@@ -13,7 +13,7 @@ type Handler struct {
 }
 
 // NewHanlder - returns a pointer to a handler
-func NewHanlder() *Handler {
+func NewHandler() *Handler {
 	return &Handler{}
 }
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	transportHTTP "github.com/rafaeldiazmiles/API-rest-tutorialedge/internal/http"
+	transportHTTP "github.com/rafaeldiazmiles/API-rest-tutorialedge/transport"
 )
 
 // App - the struct which contains things like pointers
