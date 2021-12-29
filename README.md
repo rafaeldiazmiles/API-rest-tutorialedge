@@ -1,2 +1,3 @@
 # API-rest-tutorialedge
-Doing the API rest course in tutorial edge
+Doing the API REST course from tutorial edge
+Language: Go
