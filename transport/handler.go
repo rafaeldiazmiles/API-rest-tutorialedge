@@ -27,11 +27,11 @@ func (h *Handler) SetupRoutes() {
 	fmt.Println("Setting up routes")
 	h.Router = mux.NewRouter()
 
-	h.Router.HandleFunc("/api/comment/{id]", h.GetAllComments).Methods("GET")
-	h.Router.HandleFunc("/api/comment/{id]", h.PostComment).Methods("POST")
-	h.Router.HandleFunc("/api/comment/{id]", h.GetComment).Methods("GET")
-	h.Router.HandleFunc("/api/comment/{id]", h.UpdateComment).Methods("PUT")
-	h.Router.HandleFunc("/api/comment/{id]", h.DeleteComment).Methods("DELETE")
+	h.Router.HandleFunc("/api/comment/", h.GetAllComments).Methods("GET")
+	h.Router.HandleFunc("/api/comment/", h.PostComment).Methods("POST")
+	h.Router.HandleFunc("/api/comment/{id}", h.GetComment).Methods("GET")
+	h.Router.HandleFunc("/api/comment/{id}", h.UpdateComment).Methods("PUT")
+	h.Router.HandleFunc("/api/comment/{id}", h.DeleteComment).Methods("DELETE")
 
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "I am alive!")
