@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -13,6 +14,11 @@ import (
 type Handler struct {
 	Router  *mux.Router
 	Service *comment.Service
+}
+
+// Response - an object to store responses from our API
+type Response struct {
+	Message string
 }
 
 // NewHanlder - returns a pointer to a handler
@@ -34,12 +40,19 @@ func (h *Handler) SetupRoutes() {
 	h.Router.HandleFunc("/api/comment/{id}", h.DeleteComment).Methods("DELETE")
 
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "I am alive!")
+		w.Header().Set("Content-Type", "application/json; charse=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(Response{Message: "I am alive"}); err != nil {
+			panic(err)
+		}
 	})
 }
 
 // GetComment - retrieve a comment by ID
 func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -53,42 +66,74 @@ func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Error retrieving comment by ID")
 	}
 
-	fmt.Fprintf(w, "%+v", comment)
+	if err := json.NewEncoder(w).Encode(comment); err != nil {
+		panic(err)
+	}
 }
 
 //  GetAllComments - retrieves all comments from the comments service
 func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
+	w.WriteHeader(http.StatusOK)
 	comments, err := h.Service.GetAllComments()
 	if err != nil {
 		fmt.Fprintf(w, "Failed to retrieve all comments")
 	}
-	fmt.Fprintf(w, "%+v", comments)
+
+	if err := json.NewEncoder(w).Encode(comments); err != nil {
+		panic(err)
+	}
 }
 
 // PostComment - adds a new comment
 func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
-	comment, err := h.Service.PostComment(comment.Comment{
-		Slug: "/",
-	})
+	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
+	var comment comment.Comment
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		fmt.Fprintf(w, "Failed to decode JSON Body")
+	}
+
+	comment, err := h.Service.PostComment(comment)
 	if err != nil {
 		fmt.Fprintf(w, "Failed to post new comment")
 	}
-	fmt.Fprintf(w, "%+v", comment)
+	if err := json.NewEncoder(w).Encode(comment); err != nil {
+		panic(err)
+	}
 }
 
 // UpdateComment - updates comment by ID
 func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
-	comment, err := h.Service.UpdateComment(1, comment.Comment{
-		Slug: "/new",
-	})
+	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
+	var comment comment.Comment
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		fmt.Fprintf(w, "Failed to decode JSON Body")
+	}
+	vars := mux.Vars(r)
+	id := vars["id"]
+	commentID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		fmt.Fprintf(w, "Failed to parse uint from ID")
+	}
+
+	comment, err = h.Service.UpdateComment(uint(commentID), comment)
 	if err != nil {
 		fmt.Fprintf(w, "Failed to update comment")
 	}
-	fmt.Fprintf(w, "%+v", comment)
+	if err := json.NewEncoder(w).Encode(comment); err != nil {
+		panic(err)
+	}
 }
 
 // DeleteComment - deletes a comment by ID
 func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 	commentID, err := strconv.ParseUint(id, 10, 64)
@@ -101,5 +146,8 @@ func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Failed to delete comment by comment ID")
 	}
 
-	fmt.Fprintf(w, "Succesfully deleted comment")
+	if err := json.NewEncoder(w).Encode(Response{Message: "Comment succesfully deleted"}); err != nil {
+		panic(err)
+	}
+
 }
